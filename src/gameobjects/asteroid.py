@@ -13,11 +13,17 @@ class Asteroid(Base):
         collision_type,
         sprite_list
     ):
+        asteroid_texture = arcade.load_texture(
+            file_name="res/sprites/asteroids_sprite_sheet.png",
+            x=66,
+            y=194,
+            width=58,
+            height=61
+        )
         super().__init__(
-            image_x=66,
-            image_y=194,
-            image_width=58,
-            image_height=61,
+            texture_list=[
+                asteroid_texture
+            ],
             center_x=screen_width / 2 - 58,
             center_y=screen_height / 2 - 61,
             screen_width=screen_width,

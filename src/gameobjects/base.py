@@ -7,10 +7,7 @@ class Base(Sprite):
 
     def __init__(
         self,
-        image_x,
-        image_y,
-        image_width,
-        image_height,
+        texture_list,
         center_x,
         center_y,
         screen_width,
@@ -25,15 +22,12 @@ class Base(Sprite):
         body_type: int = Body.DYNAMIC,
     ):
         super().__init__(
-            filename="res/sprites/asteroids_sprite_sheet.png",
             scale=1,
-            image_x=image_x,
-            image_y=image_y,
-            image_width=image_width,
-            image_height=image_height,
             center_x=center_x,
-            center_y=center_y,
+            center_y=center_y
         )
+        self.textures = texture_list
+        self.set_texture(self.cur_texture_index)
         physics_engine.add_sprite(
             sprite=self,
             friction=friction,
