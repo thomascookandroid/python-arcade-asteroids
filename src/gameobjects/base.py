@@ -1,6 +1,6 @@
 from typing import Optional
 from arcade import Sprite, SpriteList, PymunkPhysicsEngine
-from pymunk import Body
+from pymunk import Body, ShapeFilter
 
 
 class Base(Sprite):
@@ -17,16 +17,19 @@ class Base(Sprite):
         thrust_force,
         collision_type,
         physics_engine,
+        physics_filter,
         sprite_list,
         moment: Optional[float] = None,
         body_type: int = Body.DYNAMIC,
+        angle=0
     ):
         super().__init__(
             scale=1,
             center_x=center_x,
-            center_y=center_y
+            center_y=center_y,
+            angle=angle
         )
-        self.textures = texture_list
+        self.textures = [indexed_texture.texture for indexed_texture in texture_list]
         self.set_texture(self.cur_texture_index)
         physics_engine.add_sprite(
             sprite=self,
@@ -36,6 +39,8 @@ class Base(Sprite):
             collision_type=collision_type,
             body_type=body_type
         )
+        for shape in self.physics_body.shapes:
+            shape.filter = physics_filter
         sprite_list.append(
             sprite=self
         )
