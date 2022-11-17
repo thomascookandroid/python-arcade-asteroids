@@ -14,4 +14,6 @@
   - see [configure conda environment](https://www.jetbrains.com/help/pycharm/conda-support-creating-conda-virtual-environment.html)
 - install arcade
   - `pip install arcade`
+- install shapely
+  - `conda install shapely --channel conda-forge` 
 - right click `src/app/main.py` and click `run 'main'`
