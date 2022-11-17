@@ -76,6 +76,7 @@ class Player(Base):
     def right_pressed(self, value):
         self.__right_pressed = value
 
+    @property
     def __can_shoot(self):
         return self.__frames_since_last_shot >= 20
 
@@ -99,6 +100,6 @@ class Player(Base):
         angular_velocity = 7 if self.left_pressed else (-7 if self.right_pressed else 0)
         self.physics_body.angular_velocity = angular_velocity
         if self.shoot_pressed:
-            if self.__can_shoot():
+            if self.__can_shoot:
                 self.__frames_since_last_shot = 0
                 self.__shoot(self)
