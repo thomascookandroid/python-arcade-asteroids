@@ -1,16 +1,13 @@
 from typing import Optional
 from arcade import Sprite, SpriteList, PymunkPhysicsEngine
-from pymunk import Body
+from pymunk import Body, ShapeFilter
 
 
 class Base(Sprite):
 
     def __init__(
         self,
-        image_x,
-        image_y,
-        image_width,
-        image_height,
+        texture_list,
         center_x,
         center_y,
         screen_width,
@@ -20,20 +17,21 @@ class Base(Sprite):
         thrust_force,
         collision_type,
         physics_engine,
+        physics_filter,
         sprite_list,
         moment: Optional[float] = None,
         body_type: int = Body.DYNAMIC,
+        angle: float = 0,
+        scale: float = 1
     ):
         super().__init__(
-            filename="res/sprites/asteroids_sprite_sheet.png",
-            scale=1,
-            image_x=image_x,
-            image_y=image_y,
-            image_width=image_width,
-            image_height=image_height,
+            scale=scale,
             center_x=center_x,
             center_y=center_y,
+            angle=angle
         )
+        self.textures = [indexed_texture.texture for indexed_texture in texture_list]
+        self.set_texture(self.cur_texture_index)
         physics_engine.add_sprite(
             sprite=self,
             friction=friction,
@@ -42,6 +40,8 @@ class Base(Sprite):
             collision_type=collision_type,
             body_type=body_type
         )
+        for shape in self.physics_body.shapes:
+            shape.filter = physics_filter
         sprite_list.append(
             sprite=self
         )
@@ -72,6 +72,10 @@ class Base(Sprite):
         return self.physics_engine.get_physics_object(
             sprite=self
         ).body
+
+    @property
+    def current_velocity(self):
+        return self.physics_body.velocity.length
 
     @property
     def friction(self):
