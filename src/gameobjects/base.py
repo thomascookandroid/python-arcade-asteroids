@@ -1,6 +1,6 @@
 from typing import Optional
-from arcade import Sprite, SpriteList, PymunkPhysicsEngine
-from pymunk import Body, ShapeFilter
+from arcade import Sprite, PymunkPhysicsEngine
+from pymunk import Body
 
 
 class Base(Sprite):
@@ -56,20 +56,12 @@ class Base(Sprite):
         self.__sprite_list = sprite_list
 
     @property
-    def screen_width(self):
-        return self.__screen_width
-
-    @property
-    def screen_height(self):
-        return self.__screen_height
-
-    @property
-    def physics_engine(self) -> PymunkPhysicsEngine:
+    def _physics_engine(self) -> PymunkPhysicsEngine:
         return self.physics_engines[0]
 
     @property
     def physics_body(self) -> Body:
-        return self.physics_engine.get_physics_object(
+        return self._physics_engine.get_physics_object(
             sprite=self
         ).body
 
@@ -78,39 +70,15 @@ class Base(Sprite):
         return self.physics_body.velocity.length
 
     @property
-    def friction(self):
-        return self.__friction
-
-    @property
-    def max_velocity(self):
-        return self.__max_velocity
-
-    @property
     def thrust_force(self):
         return self.__thrust_force
 
-    @property
-    def collision_type(self):
-        return self.__collision_type
-
-    @property
-    def moment(self):
-        return self.__moment
-
-    @property
-    def body_type(self):
-        return self.__body_type
-
-    @property
-    def sprite_list(self) -> SpriteList:
-        return self.sprite_lists[0]
-
     def wrap_to_screen(self):
         if self.right < - self.width:
-            self.physics_body.position = (self.screen_width, self.physics_body.position.y)
-        if self.left > self.screen_width + self.width:
+            self.physics_body.position = (self.__screen_width, self.physics_body.position.y)
+        if self.left > self.__screen_width + self.width:
             self.physics_body.position = (0, self.physics_body.position.y)
         if self.bottom < - self.height:
-            self.physics_body.position = (self.physics_body.position.x, self.screen_height)
-        if self.top > self.screen_height + self.height:
+            self.physics_body.position = (self.physics_body.position.x, self.__screen_height)
+        if self.top > self.__screen_height + self.height:
             self.physics_body.position = (self.physics_body.position.x, 0)

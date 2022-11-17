@@ -94,17 +94,17 @@ class AsteroidsGame(
     def setup(
         self
     ):
-        self.scene = arcade.Scene()
-        self.scene.add_sprite_list(
+        self.__scene = arcade.Scene()
+        self.__scene.add_sprite_list(
             name=SCENE_SPRITE_LIST_PLAYER
         )
-        self.scene.add_sprite_list(
+        self.__scene.add_sprite_list(
             name=SCENE_SPRITE_LIST_ASTEROID
         )
-        self.scene.add_sprite_list(
+        self.__scene.add_sprite_list(
             name=SCENE_SPRITE_LIST_BULLET
         )
-        self.physics_engine = arcade.PymunkPhysicsEngine(
+        self.__physics_engine = arcade.PymunkPhysicsEngine(
             damping=DAMPING,
             gravity=GRAVITY
         )
@@ -112,7 +112,7 @@ class AsteroidsGame(
         def on_bullet_timeout(
             bullet
         ):
-            self.kill_bullet(bullet)
+            self.__kill_bullet(bullet)
 
         def shoot(
             player
@@ -123,37 +123,37 @@ class AsteroidsGame(
                 center_x=player.center_x,
                 center_y=player.center_y,
                 angle=player.angle,
-                physics_engine=self.physics_engine,
+                physics_engine=self.__physics_engine,
                 physics_filter=COLLISION_FILTER_BULLET,
                 collision_type=COLLISION_TYPE_BULLET,
-                sprite_list=self.bullet_sprite_list,
+                sprite_list=self.__bullet_sprite_list,
                 frames_to_persist=60*3,
                 initial_velocity=player.current_velocity,
                 on_timeout=on_bullet_timeout
             )
-            self.bullets.append(
+            self.__bullets.append(
                 bullet
             )
             return False
 
-        self.player = Player(
+        self.__player = Player(
             screen_width=self.width,
             screen_height=self.height,
             center_x=self.width / 2,
             center_y=self.height / 2,
-            physics_engine=self.physics_engine,
+            physics_engine=self.__physics_engine,
             physics_filter=COLLISION_FILTER_PLAYER,
             collision_type=COLLISION_TYPE_PLAYER,
-            sprite_list=self.player_sprite_list,
+            sprite_list=self.__player_sprite_list,
             shoot=shoot
         )
 
         initial_asteroids = [
-            self.create_new_asteroid(size, self.__asteroid_spawn_poly) for size in [
+            self.__create_new_asteroid(size, self.__asteroid_spawn_poly) for size in [
                 ASTEROID_INITIAL_SIZE for _ in range(ASTEROID_INITIAL_COUNT)
             ]
         ]
-        self.asteroids.extend(initial_asteroids)
+        self.__asteroids.extend(initial_asteroids)
 
         def player_asteroid_hit_handler(
             player,
@@ -162,10 +162,10 @@ class AsteroidsGame(
             space,
             data
         ):
-            self.kill_player(
+            self.__kill_player(
                 player
             )
-            self.kill_asteroid(
+            self.__kill_asteroid(
                 asteroid
             )
             self.setup()
@@ -177,33 +177,33 @@ class AsteroidsGame(
             space,
             data
         ):
-            self.kill_bullet(
+            self.__kill_bullet(
                 bullet
             )
-            self.kill_asteroid(
+            self.__kill_asteroid(
                 asteroid
             )
 
-        self.physics_engine.add_collision_handler(
+        self.__physics_engine.add_collision_handler(
             first_type=COLLISION_TYPE_PLAYER,
             second_type=COLLISION_TYPE_ASTEROID,
             post_handler=player_asteroid_hit_handler
         )
 
-        self.physics_engine.add_collision_handler(
+        self.__physics_engine.add_collision_handler(
             first_type=COLLISION_TYPE_BULLET,
             second_type=COLLISION_TYPE_ASTEROID,
             post_handler=bullet_asteroid_hit_handler
         )
 
-    def kill_player(
+    def __kill_player(
         self,
         player
     ):
         player.kill()
-        self.player = None
+        self.__player = None
 
-    def create_new_asteroid(
+    def __create_new_asteroid(
         self,
         size,
         spawn_area
@@ -233,39 +233,39 @@ class AsteroidsGame(
             screen_height=self.height,
             center_x=spawn_point.x,
             center_y=spawn_point.y,
-            physics_engine=self.physics_engine,
+            physics_engine=self.__physics_engine,
             physics_filter=COLLISION_FILTER_ASTEROID,
             collision_type=COLLISION_TYPE_ASTEROID,
-            sprite_list=self.asteroid_sprite_list,
+            sprite_list=self.__asteroid_sprite_list,
             max_size=ASTEROID_INITIAL_SIZE,
             angle=self.__random.uniform(0.0, 2.0),
             size=size
         )
 
-    def kill_asteroid(
+    def __kill_asteroid(
         self,
         asteroid
     ):
         asteroid.kill()
-        self.asteroids.remove(
+        self.__asteroids.remove(
             asteroid
         )
         if asteroid.size > 1:
             new_asteroids = [
-                self.create_new_asteroid(size, asteroid.poly) for size in [
+                self.__create_new_asteroid(size, asteroid.poly) for size in [
                     asteroid.size - 1 for _ in range(ASTEROID_SPLIT_COUNT)
                 ]
             ]
-            self.asteroids.extend(
+            self.__asteroids.extend(
                 new_asteroids
             )
 
-    def kill_bullet(
+    def __kill_bullet(
         self,
         bullet
     ):
         bullet.kill()
-        self.bullets.remove(
+        self.__bullets.remove(
             bullet
         )
 
@@ -275,17 +275,17 @@ class AsteroidsGame(
         modifiers: int
     ):
         if symbol == arcade.key.A:
-            if self.player:
-                self.player.left_pressed = True
+            if self.__player:
+                self.__player.left_pressed = True
         elif symbol == arcade.key.D:
-            if self.player:
-                self.player.right_pressed = True
+            if self.__player:
+                self.__player.right_pressed = True
         elif symbol == arcade.key.W:
-            if self.player:
-                self.player.forward_pressed = True
+            if self.__player:
+                self.__player.forward_pressed = True
         elif symbol == arcade.key.SPACE:
-            if self.player:
-                self.player.shoot_pressed = True
+            if self.__player:
+                self.__player.shoot_pressed = True
 
     def on_key_release(
         self,
@@ -293,129 +293,65 @@ class AsteroidsGame(
         modifiers: int
     ):
         if symbol == arcade.key.A:
-            if self.player:
-                self.player.left_pressed = False
+            if self.__player:
+                self.__player.left_pressed = False
         elif symbol == arcade.key.D:
-            if self.player:
-                self.player.right_pressed = False
+            if self.__player:
+                self.__player.right_pressed = False
         elif symbol == arcade.key.W:
-            if self.player:
-                self.player.forward_pressed = False
+            if self.__player:
+                self.__player.forward_pressed = False
         elif symbol == arcade.key.SPACE:
-            if self.player:
-                self.player.shoot_pressed = False
+            if self.__player:
+                self.__player.shoot_pressed = False
 
     def on_update(
         self,
         delta_time: float
     ):
-        if self.player:
-            self.player.on_update(
+        if self.__player:
+            self.__player.on_update(
                 delta_time
             )
-        for asteroid in self.asteroids:
+        for asteroid in self.__asteroids:
             asteroid.on_update(
                 delta_time
             )
-        for bullet in self.bullets:
+        for bullet in self.__bullets:
             bullet.on_update(
                 delta_time
             )
-        self.physics_engine.step()
+        self.__physics_engine.step()
 
     def on_draw(
         self
     ):
         self.clear()
-        self.scene.draw(
+        self.__scene.draw(
             pixelated=True
         )
 
     @property
-    def player(
+    def __asteroid_sprite_list(
         self
     ):
-        return self.__player
-
-    @player.setter
-    def player(
-        self,
-        value
-    ):
-        self.__player = value
-
-    @property
-    def asteroids(
-        self
-    ):
-        return self.__asteroids
-
-    @asteroids.setter
-    def asteroids(
-        self,
-        value
-    ):
-        self.__asteroids = value
-
-    @property
-    def bullets(
-        self
-    ):
-        return self.__bullets
-
-    @bullets.setter
-    def bullets(
-        self,
-        value
-    ):
-        self.__bullets = value
-
-    @property
-    def asteroid_sprite_list(
-        self
-    ):
-        return self.scene.get_sprite_list(
+        return self.__scene.get_sprite_list(
             SCENE_SPRITE_LIST_ASTEROID
         )
 
     @property
-    def player_sprite_list(
+    def __player_sprite_list(
         self
     ):
-        return self.scene.get_sprite_list(
+        return self.__scene.get_sprite_list(
             SCENE_SPRITE_LIST_PLAYER
         )
 
     @property
-    def bullet_sprite_list(
+    def __bullet_sprite_list(
         self
     ):
-        return self.scene.get_sprite_list(
+        return self.__scene.get_sprite_list(
             SCENE_SPRITE_LIST_BULLET
         )
 
-    @property
-    def scene(
-        self
-    ):
-        return self.__scene
-
-    @scene.setter
-    def scene(
-        self,
-        value
-    ):
-        self.__scene = value
-
-    @property
-    def physics_engine(
-        self
-    ):
-        return self.__physics_engine
-
-    @physics_engine.setter
-    def physics_engine(
-        self,
-        value
-    ):
-        self.__physics_engine = value

@@ -1,7 +1,7 @@
+import arcade
 from typing import Callable
-
 from src.gameobjects.base import Base
-from src.textures.textures import *
+from src.textures.textures import textures, TEXTURE_SHIP_NO_THRUST, TEXTURE_SHIP_THRUST
 
 
 class Player(Base):
@@ -76,8 +76,7 @@ class Player(Base):
     def right_pressed(self, value):
         self.__right_pressed = value
 
-    @property
-    def can_shoot(self):
+    def __can_shoot(self):
         return self.__frames_since_last_shot >= 20
 
     def on_update(
@@ -93,13 +92,13 @@ class Player(Base):
         self.set_texture(self.cur_texture_index)
         forward_thrust = self.thrust_force if self.forward_pressed else 0
         forward_thrust_vector = (0, forward_thrust)
-        self.physics_engine.apply_force(
+        self._physics_engine.apply_force(
             sprite=self,
             force=forward_thrust_vector
         )
         angular_velocity = 7 if self.left_pressed else (-7 if self.right_pressed else 0)
         self.physics_body.angular_velocity = angular_velocity
         if self.shoot_pressed:
-            if self.can_shoot:
+            if self.__can_shoot():
                 self.__frames_since_last_shot = 0
                 self.__shoot(self)

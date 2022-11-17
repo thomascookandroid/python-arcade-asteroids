@@ -1,5 +1,6 @@
+import arcade
 from src.gameobjects.base import Base
-from src.textures.textures import *
+from src.textures.textures import textures, TEXTURE_BULLET
 
 
 class Bullet(Base):
@@ -52,7 +53,7 @@ class Bullet(Base):
         else:
             forward_thrust = self.thrust_force
             forward_thrust_vector = (0, forward_thrust)
-            self.physics_engine.apply_force(
+            self._physics_engine.apply_force(
                 sprite=self,
                 force=forward_thrust_vector
             )

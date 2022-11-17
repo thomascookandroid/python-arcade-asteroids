@@ -1,6 +1,8 @@
+import arcade
 from src.gameobjects.base import Base
-from src.textures.textures import *
 from shapely.geometry import box
+from src.textures.textures import textures, TEXTURE_ASTEROID
+
 
 class Asteroid(Base):
 
@@ -46,7 +48,7 @@ class Asteroid(Base):
         self.wrap_to_screen()
         forward_thrust = self.thrust_force
         forward_thrust_vector = (0, forward_thrust)
-        self.physics_engine.apply_force(
+        self._physics_engine.apply_force(
             sprite=self,
             force=forward_thrust_vector
         )
