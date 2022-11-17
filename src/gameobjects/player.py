@@ -102,4 +102,4 @@ class Player(Base):
         if self.shoot_pressed:
             if self.can_shoot:
                 self.__frames_since_last_shot = 0
-                self.__shoot( self)
+                self.__shoot(self)

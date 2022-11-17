@@ -1,11 +1,15 @@
+import random
+
 import arcade
-from typing import *
-
+from typing import Optional, List
 from pymunk import ShapeFilter
-
 from src.gameobjects.asteroid import Asteroid
 from src.gameobjects.bullet import Bullet
 from src.gameobjects.player import Player
+from random import Random
+from shapely.geometry import box, Point
+
+from src.textures.textures import textures, TEXTURE_SHIP_THRUST, TEXTURE_ASTEROID
 
 SCENE_SPRITE_LIST_PLAYER = "spriteListPlayer"
 SCENE_SPRITE_LIST_BULLET = "spriteListBullet"
@@ -33,6 +37,9 @@ COLLISION_FILTER_ASTEROID = ShapeFilter(
 )
 DAMPING = 0.6
 GRAVITY = (0, 0)
+ASTEROID_INITIAL_COUNT = 4
+ASTEROID_INITIAL_SIZE = 3
+ASTEROID_SPLIT_COUNT = 3
 
 
 class AsteroidsGame(
@@ -52,12 +59,37 @@ class AsteroidsGame(
         )
         arcade.set_background_color(
             arcade.csscolor.BLACK
-            )
+        )
+        self.__random = Random()
+        self.__random.seed()
         self.__player: Optional[Player] = None
         self.__asteroids: List[Asteroid] = []
         self.__bullets: List[Bullet] = []
         self.__scene = Optional[arcade.Scene]
         self.__physics_engine = Optional[arcade.PymunkPhysicsEngine]
+        player_texture_width = textures[TEXTURE_SHIP_THRUST].texture.width
+        player_texture_height = textures[TEXTURE_SHIP_THRUST].texture.height
+        asteroid_texture_width = textures[TEXTURE_ASTEROID].texture.width
+        asteroid_texture_height = textures[TEXTURE_ASTEROID].texture.height
+        asteroid_spawn_hole_width = player_texture_width + asteroid_texture_width
+        asteroid_spawn_hole_height = player_texture_height + asteroid_texture_height
+        asteroid_spawn_hole_left = self.width / 2 - asteroid_spawn_hole_width
+        asteroid_spawn_hole_right = self.width / 2 + asteroid_spawn_hole_width
+        asteroid_spawn_hole_top = self.height / 2 - asteroid_spawn_hole_height
+        asteroid_spawn_hole_bottom = self.height / 2 + asteroid_spawn_hole_height
+        asteroid_no_spawn_box = box(
+            asteroid_spawn_hole_left,
+            asteroid_spawn_hole_top,
+            asteroid_spawn_hole_right,
+            asteroid_spawn_hole_bottom
+        )
+        window_box = box(
+            0,
+            0,
+            self.width,
+            self.height
+        )
+        self.__asteroid_spawn_poly = window_box.difference(asteroid_no_spawn_box)
 
     def setup(
         self
@@ -96,6 +128,7 @@ class AsteroidsGame(
                 collision_type=COLLISION_TYPE_BULLET,
                 sprite_list=self.bullet_sprite_list,
                 frames_to_persist=60*3,
+                initial_velocity=player.current_velocity,
                 on_timeout=on_bullet_timeout
             )
             self.bullets.append(
@@ -115,18 +148,12 @@ class AsteroidsGame(
             shoot=shoot
         )
 
-        self.asteroids = [
-            Asteroid(
-                screen_width=self.width,
-                screen_height=self.height,
-                center_x=self.width / 2 - 58,
-                center_y=self.height / 2 - 61,
-                physics_engine=self.physics_engine,
-                physics_filter=COLLISION_FILTER_ASTEROID,
-                collision_type=COLLISION_TYPE_ASTEROID,
-                sprite_list=self.asteroid_sprite_list
-            )
+        initial_asteroids = [
+            self.create_new_asteroid(size, self.__asteroid_spawn_poly) for size in [
+                ASTEROID_INITIAL_SIZE for _ in range(ASTEROID_INITIAL_COUNT)
+            ]
         ]
+        self.asteroids.extend(initial_asteroids)
 
         def player_asteroid_hit_handler(
             player,
@@ -176,6 +203,45 @@ class AsteroidsGame(
         player.kill()
         self.player = None
 
+    def create_new_asteroid(
+        self,
+        size,
+        spawn_area
+    ):
+        def random_point_in_polygon(
+            polygon
+        ):
+            min_x, min_y, max_x, max_y = polygon.bounds
+            point = Point(
+                random.uniform(
+                    min_x,
+                    max_x
+                ),
+                random.uniform(
+                    min_y,
+                    max_y
+                )
+            )
+            return point if polygon.contains(point)\
+                else random_point_in_polygon(polygon)
+
+        spawn_point = random_point_in_polygon(
+            spawn_area
+        )
+        return Asteroid(
+            screen_width=self.width,
+            screen_height=self.height,
+            center_x=spawn_point.x,
+            center_y=spawn_point.y,
+            physics_engine=self.physics_engine,
+            physics_filter=COLLISION_FILTER_ASTEROID,
+            collision_type=COLLISION_TYPE_ASTEROID,
+            sprite_list=self.asteroid_sprite_list,
+            max_size=ASTEROID_INITIAL_SIZE,
+            angle=self.__random.uniform(0.0, 2.0),
+            size=size
+        )
+
     def kill_asteroid(
         self,
         asteroid
@@ -184,6 +250,15 @@ class AsteroidsGame(
         self.asteroids.remove(
             asteroid
         )
+        if asteroid.size > 1:
+            new_asteroids = [
+                self.create_new_asteroid(size, asteroid.poly) for size in [
+                    asteroid.size - 1 for _ in range(ASTEROID_SPLIT_COUNT)
+                ]
+            ]
+            self.asteroids.extend(
+                new_asteroids
+            )
 
     def kill_bullet(
         self,

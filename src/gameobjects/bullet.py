@@ -16,6 +16,7 @@ class Bullet(Base):
         collision_type,
         sprite_list,
         frames_to_persist,
+        initial_velocity,
         on_timeout
     ):
         super().__init__(
@@ -27,8 +28,8 @@ class Bullet(Base):
             screen_width=screen_width,
             screen_height=screen_height,
             friction=0.1,
-            max_velocity=350,
-            thrust_force=350*60,
+            max_velocity=350 + initial_velocity,
+            thrust_force=(350 + initial_velocity) * 60,
             collision_type=collision_type,
             sprite_list=sprite_list,
             physics_engine=physics_engine,

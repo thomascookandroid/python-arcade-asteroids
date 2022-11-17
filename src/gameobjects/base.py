@@ -21,10 +21,11 @@ class Base(Sprite):
         sprite_list,
         moment: Optional[float] = None,
         body_type: int = Body.DYNAMIC,
-        angle=0
+        angle: float = 0,
+        scale: float = 1
     ):
         super().__init__(
-            scale=1,
+            scale=scale,
             center_x=center_x,
             center_y=center_y,
             angle=angle
@@ -71,6 +72,10 @@ class Base(Sprite):
         return self.physics_engine.get_physics_object(
             sprite=self
         ).body
+
+    @property
+    def current_velocity(self):
+        return self.physics_body.velocity.length
 
     @property
     def friction(self):

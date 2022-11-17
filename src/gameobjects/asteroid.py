@@ -1,8 +1,6 @@
-from pymunk import ShapeFilter
-
 from src.gameobjects.base import Base
 from src.textures.textures import *
-
+from shapely.geometry import box
 
 class Asteroid(Base):
 
@@ -15,7 +13,10 @@ class Asteroid(Base):
         physics_engine,
         physics_filter,
         collision_type,
-        sprite_list
+        sprite_list,
+        max_size,
+        angle,
+        size
     ):
         super().__init__(
             texture_list=[
@@ -32,12 +33,11 @@ class Asteroid(Base):
             body_type=arcade.PymunkPhysicsEngine.DYNAMIC,
             physics_engine=physics_engine,
             physics_filter=physics_filter,
-            sprite_list=sprite_list
+            sprite_list=sprite_list,
+            scale=size/max_size
         )
-        for shape in self.physics_body.shapes:
-            shape.filter = ShapeFilter(
-                mask=ShapeFilter.ALL_MASKS() ^ 0b1
-            )
+        self.physics_body.angle = angle
+        self.__size = size
 
     def on_update(
         self,
@@ -50,3 +50,11 @@ class Asteroid(Base):
             sprite=self,
             force=forward_thrust_vector
         )
+
+    @property
+    def size(self):
+        return self.__size
+
+    @property
+    def poly(self):
+        return box(self.left, self.top, self.right, self.bottom)
